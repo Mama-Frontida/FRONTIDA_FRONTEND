@@ -12,7 +12,7 @@ function Navbar() {
   const { userData, logout } = useContext(AppContext)
   return (
     <nav
-      className={`w-full ${path == "/chat" ? "hidden" : "flex"
+      className={`w-full ${path == "/chat" ? "flex" : "flex"
         } flex-row bg-primary py-4  justify-between px-10 items-center rounded-t-md`}
     >
       <div className="lg:w-2/12 md:w-4/12 w-1/2">
@@ -26,10 +26,10 @@ function Navbar() {
       </div>
 
       <div className="flex flex-row">
-        {userData && <Avatar rounded size={'md'} >
+        {userData && <Avatar rounded size={'md'} onClick={() => { logout() }} >
           <div className="space-y-1 font-medium dark:text-white">
-            <div>Jese Leos</div>
-            <div className="text-sm text-gray-100 ">Joined in August 2014</div>
+            <div>{userData.username}</div>
+            <div className="text-sm text-gray-100 ">{userData.email}</div>
           </div>
         </Avatar>}
 

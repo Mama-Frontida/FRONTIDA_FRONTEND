@@ -2,10 +2,10 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { toast } from 'react-toastify';
-
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const BOT_ENDPOINT = 'https://nutribot-v3.onrender.com/generate-text'
 export const AppContext = createContext();
@@ -13,7 +13,6 @@ export const AppContext = createContext();
 export const AppProvider = ({ children }) => {
 
     const [userData, setUserData] = useState(null);
-
     const [activeConvo, setActiveConvo] = useState(null)
 
     useEffect(() => {
@@ -46,17 +45,44 @@ export const AppProvider = ({ children }) => {
         };
     }, [userData]);
 
+    async function signup(email, password, username) {
 
-    async function signup(email, password) {
         try {
             const response = await createUserWithEmailAndPassword(auth, email, password);
             // Handle user creation
+            response.user.username = username
             setUserData(response.user);
-            return response.user;
+
+            const userDocRef = doc(db, "usersCollection", response.user.uid);
+
+            await setDoc(userDocRef, {
+                username: username,
+                // other fields...
+            });
+
+            return { success: true, user: response.user };
         } catch (error) {
             // Handle errors
-            console.error("Signup failed: ", error);
-            throw error;
+            console.error("Signup failed: ", error.message);
+            let errorResponse;
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    errorResponse = { success: false, message: 'The email address is not valid.' };
+                    break;
+                case 'auth/email-already-in-use':
+                    errorResponse = { success: false, message: 'The email address is already in use by another account.' };
+                    break;
+                case 'auth/weak-password':
+                    errorResponse = { success: false, message: 'The password is too weak.' };
+                    break;
+                case 'auth/operation-not-allowed':
+                    errorResponse = { success: false, message: 'Email and password accounts are not enabled.' };
+                    break;
+                default:
+                    errorResponse = { success: false, message: 'An unknown error occurred.' };
+                    break;
+            }
+            return errorResponse;
         }
     }
 
@@ -64,18 +90,43 @@ export const AppProvider = ({ children }) => {
         try {
             const response = await signInWithEmailAndPassword(auth, email, password);
             // Handle successful login
-            let user = response.user
-            const token = await user.getIdToken();
-            // console.log("JWT:", token);
+            let user = response.user;
 
-            setUserData(response.user);
-            // console.log(response.user)
+            // Fetch the user's username from Firestore
+            const userDocRef = doc(db, "usersCollection", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
 
-            return response.user;
+            if (userDocSnap.exists()) {
+                // Append the username to the user object
+                console.log("Username has been fetched as :", userDocSnap.data().username)
+                user = { ...user, username: userDocSnap.data().username };
+            }
+
+            setUserData(user);
+            return { success: true, message: "Login Successful" };
         } catch (error) {
+
+            console.error("Login failed: ", error.message);
             // Handle errors
-            console.error("Login failed: ", error);
-            throw error;
+            let errorResponse;
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    errorResponse = { success: false, message: 'The email address is not valid.' };
+                    break;
+                case 'auth/user-disabled':
+                    errorResponse = { success: false, message: 'The user has been disabled.' };
+                    break;
+                case 'auth/user-not-found':
+                    errorResponse = { success: false, message: 'There is no user record corresponding to this identifier. The user may have been deleted.' };
+                    break;
+                case 'auth/wrong-password':
+                    errorResponse = { success: false, message: 'The password is invalid or the user does not have a password.' };
+                    break;
+                default:
+                    errorResponse = { success: false, message: 'An unknown error occurred.' };
+                    break;
+            }
+            return errorResponse;
         }
     }
 

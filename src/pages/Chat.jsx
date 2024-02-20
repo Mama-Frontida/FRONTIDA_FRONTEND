@@ -40,6 +40,8 @@ function Chat() {
 
     const { userData, logout } = useContext(AppContext)
 
+    // console.log(userData.username)
+
     const BotCard = ({ text }) => {
         return (
             <div className="flex flex-row items-start gap-2 w-full my-3">

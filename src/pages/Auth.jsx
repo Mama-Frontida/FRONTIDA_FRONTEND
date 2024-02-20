@@ -4,26 +4,22 @@ import { toast } from "react-toastify";
 import { AppContext } from "../contexts/AppContexts";
 import CustomToast from "../components/toast";
 import { useNavigate } from "react-router-dom";
-import { Button, Label, TextInput } from "flowbite-react";
+import { Button, Label, TextInput, Toast } from "flowbite-react";
 import { useForm } from 'react-hook-form'
-import { RiLockPasswordFill, RiLockPasswordLine, RiProfileLine, RiUser2Fill, RiUser3Fill } from "react-icons/ri";
+import { RiCheckLine, RiCloseLine, RiLockPasswordFill, RiLockPasswordLine, RiProfileLine, RiUser2Fill, RiUser3Fill } from "react-icons/ri";
 import { MdEmail, MdInfo } from "react-icons/md";
 function Auth() {
     const { login, signup, userData } = useContext(AppContext)
-    const [errorMessage, setErrorMessage] = useState()
+    const [errorMessage, setErrorMessage] = useState(null)
 
     const [inL, setIn] = useState(true)
     const navigate = useNavigate();
 
     console.log('userdata', userData)
 
-    const signupEmailRef = useRef()
-    const signupPass = useRef()
-
     const toggleAuth = () => {
         setIn(!inL)
     }
-
 
     const handleSignIn = async (data) => {
 
@@ -49,17 +45,20 @@ function Auth() {
         const email = data.email
         const password = data.password
 
-        try {
-            // Await the login function and handle successful login
-            await signup(username, email, password);
+        console.log({ username, email, password })
+        // Await the login function and handle successful login
+        const SignUpMessage = await signup(email, password, username);
 
-            CustomToast({ type: 'success', message: 'User account created successfully.' })
-            navigate('/chat')
-
-        } catch (error) {
-
-            CustomToast({ type: 'danger', message: 'Sign up Failed' });
+        console.log("Signup Message :", SignUpMessage)
+        if (!SignUpMessage.success) {
+            // CustomToast({ type: 'danger', message: SignUpMessage.message })
+            setErrorMessage(SignUpMessage)
+            console.log("Error msg ", errorMessage)
+            return
         }
+        setErrorMessage(SignUpMessage)
+        // CustomToast({ type: 'success', message: 'User account created successfully.' })
+        navigate('/chat')
     }
 
     const {
@@ -79,6 +78,21 @@ function Auth() {
                 <h3 className="text-xl font-base text-gray-800 text-center py-5">
                     Continue where you left off...
                 </h3>
+                {
+                    errorMessage && <Toast >
+
+                        {!errorMessage.success && <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200">
+                            <RiCloseLine className="h-5 w-5" />
+                        </div>}
+                        {
+                            errorMessage.success && <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
+                                <RiCheckLine className="h-5 w-5" />
+                            </div>
+                        }
+                        <div className="ml-3 text-sm font-normal">{errorMessage.message}</div>
+                        <Toast.Toggle />
+                    </Toast>
+                }
                 <div className="flex flex-col w-full gap-5 items-center justify-center py-10">
                     <div className="flex flex-col gap-1 w-3/4">
                         <Label >Enter your email here:</Label>
@@ -146,6 +160,21 @@ function Auth() {
                     Get started with an account to help us improve our services for you.
                 </h3>
                 <div className="flex w-full items-center flex-col gap-4">
+                    {
+                        errorMessage && <Toast className="!w-full !max-w-full" >
+
+                            {!errorMessage.success && <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200">
+                                <RiCloseLine className="h-5 w-5" />
+                            </div>}
+                            {
+                                errorMessage.success && <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
+                                    <RiCheckLine className="h-5 w-5" />
+                                </div>
+                            }
+                            <div className="ml-3 w-full text-sm font-normal">{errorMessage.message}</div>
+                            <Toast.Toggle />
+                        </Toast>
+                    }
                     <div className="flex flex-col gap-1 w-3/4">
                         <Label >Enter your username here:</Label>
                         <TextInput
@@ -205,14 +234,14 @@ function Auth() {
                             <TextInput
                                 {...register("confirm_password", {
                                     required: 'Please confirm your password.',
-                                    validate: (value) => value === getValues('user_password') || 'Passwords do not match.',
+                                    validate: (value) => value === getValues('password') || 'Passwords do not match.',
                                 })}
                                 icon={MdInfo}
                                 type="password"
                                 placeholder="Confirm Password"
                                 className='w-full'
                                 helperText={errors.confirm_password?.message}
-                                color={errors.confirm_password ? 'failure' : (watch('user_password') === getValues('confirm_password') ? 'success' : 'gray')}
+                                color={errors.confirm_password ? 'failure' : (watch('password') === getValues('confirm_password') ? 'success' : 'gray')}
                             />
 
                         </div>

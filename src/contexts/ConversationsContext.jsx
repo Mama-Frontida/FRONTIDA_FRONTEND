@@ -12,7 +12,7 @@ export const ConversationsProvider = ({ children }) => {
     const { userData } = useContext(AppContext);
 
     useEffect(() => {
-        let unsubscribe = () => {};
+        let unsubscribe = () => { };
 
         const fetchUserConversations = async () => {
             try {
@@ -33,9 +33,9 @@ export const ConversationsProvider = ({ children }) => {
             }
         };
 
-        if (userData) {
-            fetchUserConversations();
-        }
+        // if (userData) {
+        //     fetchUserConversations();
+        // }
 
         // Cleanup function to unsubscribe from the listener when the component unmounts
         return () => unsubscribe();
