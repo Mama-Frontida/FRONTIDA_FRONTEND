@@ -7,7 +7,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { toast } from 'react-toastify';
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
-const BOT_ENDPOINT = 'https://nutribot-v3.onrender.com/generate-text'
+const BOT_ENDPOINT = 'https://frontida-apis.onrender.com/generateText'
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
@@ -134,20 +134,20 @@ export const AppProvider = ({ children }) => {
         const headers = {
             "Content-Type": "application/json"
         };
+        console.log("Sent Data : ", prompt)
 
         // Configure the fetch options for POST request with CORS enabled
         const requestOptions = {
             method: "POST",
             headers: headers,
-            body: JSON.stringify(prompt),
-            mode: 'cors' // Enable CORS
+            body: JSON.stringify(prompt)
         };
 
         try {
             let botResponse = await fetch(BOT_ENDPOINT, requestOptions);
             if (!botResponse.ok) {
                 // If the response status is not ok, throw an error
-                return (`[SEP]I'm sorry, I am unable to respond at this time.`);
+                return ({ generated_text: 'I am sorry, I am unable to process a response at the moment, please try again in a few minutes.' });
 
             }
 
@@ -159,6 +159,9 @@ export const AppProvider = ({ children }) => {
         }
     }
 
+    const saveChat = (chat_name, chat_data) => {
+
+    }
     const saveConvo = async (data) => {
         let API_ENDPOINT = 'http://127.0.0.1:8000/api/add_convo'
         try {

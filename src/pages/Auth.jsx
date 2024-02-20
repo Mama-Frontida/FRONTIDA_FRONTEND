@@ -23,12 +23,11 @@ function Auth() {
 
     const handleSignIn = async (data) => {
 
-        const userData = {
-            email: data.email,
-            password: data.password,
-        }
+            const email =  data.email
+            const password = data.password
+        
         try {
-            await login(email, password);
+            await login(email,password);
             CustomToast({ type: 'success', message: 'User logged in successfully.' })
             navigate('/');
 

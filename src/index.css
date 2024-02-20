@@ -7,3 +7,7 @@
 * {
   font-family: "Lora", serif !important;
 }
+
+.scroll-force{
+  overflow-y: scroll !important;
+}

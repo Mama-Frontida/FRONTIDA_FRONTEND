@@ -13,7 +13,7 @@ function Home() {
         <p className="text-xl text-gray-800">
           Introducing the next generation medical services at the comfort of your phone.  Engage with our model and let us beat postpartum depression together.
         </p>
-        <Link to={'/shatt'}><Button color="dark" pill className="w-fit px-7">Get Started</Button></Link>
+        <Link to={'/chat'}><Button color="dark" pill className="w-fit px-7">Get Started</Button></Link>
       </div>
       <div className="w-1/2 flex items-center justify-center">
         <img src="/images/Mother.png" alt="" />

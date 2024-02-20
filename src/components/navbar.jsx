@@ -3,7 +3,8 @@ import { GiAstronautHelmet, GiHamburgerMenu } from "react-icons/gi";
 import { MdOutlineSupervisedUserCircle } from "react-icons/md";
 import { Link, useLocation } from "react-router-dom";
 import { AppContext } from "../contexts/AppContexts";
-import { Avatar, Button } from "flowbite-react";
+import { Avatar, Button, Tooltip } from "flowbite-react";
+import { RiQuillPenFill } from "react-icons/ri";
 
 function Navbar() {
   const location = useLocation();
@@ -26,12 +27,31 @@ function Navbar() {
       </div>
 
       <div className="flex flex-row">
-        {userData && <Avatar rounded size={'md'} onClick={() => { logout() }} >
-          <div className="space-y-1 font-medium dark:text-white">
-            <div>{userData.username}</div>
-            <div className="text-sm text-gray-100 ">{userData.email}</div>
-          </div>
-        </Avatar>}
+        {userData && <div className="flex flex-row gap-10">
+          <Link to={'/chat'}>
+            <Button pill color="dark" className="!font-sans" >
+              <RiQuillPenFill className="me-3" />
+              <h3 className="!font-sans">Start Chat</h3>
+            </Button>
+          </Link>
+          <Tooltip
+            className="shadow-none bg-transparent"
+            arrow={false}
+            placement="bottom"
+            content={
+              <>
+                <Button
+                  onClick={() => { logout() }}
+                  color="red" >Logout</Button>
+              </>
+            } >
+            <Avatar rounded size={'md'}  >
+              <div className="font-medium dark:text-white">
+                <h3 className="text-xl font-bold">{userData.username}</h3>
+                <div className="text-sm text-gray-600 ">{userData.email}</div>
+              </div>
+            </Avatar></Tooltip>
+        </div>}
 
         {!userData && <div className="flex flex-row gap-4">
           <Link to={'/auth'}>

@@ -1,12 +1,12 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useForm } from "react-hook-form";
 
 import { AppContext } from "../contexts/AppContexts";
-import { Avatar, AvatarGroupCounter, Badge, Button, TextInput, Tooltip } from "flowbite-react";
+import { Avatar, AvatarGroupCounter, Badge, Button, TextInput, Tooltip, Spinner } from "flowbite-react";
 import { MdArrowBackIos, MdArrowForwardIos, MdArrowRight, MdArrowRightAlt, MdChatBubble, MdChatBubbleOutline, MdEmojiPeople, MdInfo, MdVerticalSplit } from "react-icons/md";
 import { GiChatBubble, GiHandGrip, GiPencil, GiPencilBrush, GiQuill, GiTrashCan } from "react-icons/gi";
-import { RiArrowRightLine, RiChatQuoteFill, RiPencilFill, RiQuillPenFill, RiRobot2Fill, RiWomenFill } from "react-icons/ri";
+import { RiArrowRightLine, RiChatQuoteFill, RiExternalLinkLine, RiPencilFill, RiQuillPenFill, RiRobot2Fill, RiWomenFill } from "react-icons/ri";
 
 
 const Emotions = [
@@ -34,33 +34,114 @@ const Emotions = [
     },
 ]
 function Chat() {
-
+    const videoRef = useRef(null)
     const navigate = useNavigate()
     const [openSideNav, setOpenSideNav] = useState(true)
+    const [conversation, setConversation] = useState([])
+    const [loading, setLoading] = useState(false)
 
-    const { userData, logout } = useContext(AppContext)
+    const { userData, logout, promptBot } = useContext(AppContext)
+
+    function getEmbeddedUrl(youtubeLink) {
+        // Extract video ID from the YouTube link
+        const videoIdMatch = youtubeLink.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+
+        if (videoIdMatch) {
+            const videoId = videoIdMatch[1];
+            // Construct embedded URL
+            return `https://www.youtube.com/embed/${videoId}`;
+        } else {
+            // Invalid YouTube link
+            return null;
+        }
+    }
+
+    const handlePrompt = async (data) => {
+        setLoading(true);
+
+        try {
+            const response = await promptBot({ text: data.userPrompt });
+            const botResponse = await response.json();
+
+            console.log("Bot Response:", botResponse);
+
+            setConversation(prevConvo => [...prevConvo, { user: data.userPrompt, bot: { text: botResponse.generated_text[0].generated_text, links: botResponse.youtubeLink } }]);
+        } catch (error) {
+            console.error("Error handling prompt:", error);
+            // Handle error appropriately, e.g., show error message to user
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        console.log("Conversation history:", conversation);
+    }, [conversation]);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm()
 
     // console.log(userData.username)
 
-    const BotCard = ({ text }) => {
+    const BotCard = ({ text, links }) => {
+        return (
+            <div className="flex flex-col w-full">
+                <div className="flex flex-row items-start gap-2 w-full my-3">
+                    <Avatar rounded size={'md'} />
+                    <div className="flex flex-col w-full max-w-[320px] leading-1.5 p-4 bg-blue-300 rounded-e-xl rounded-es-xl dark:bg-gray-700">
+                        <div className="flex items-center justify-between space-x-2 rtl:space-x-reverse">
+                            <span className="text-sm font-semibold text-gray-700 dark:text-white">Frontida BOT</span>
+                            <MdInfo className="text-white" />
+                        </div>
+                        <p className="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{text}</p>
+                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">11:46</span>
+                    </div>
+                </div>
+                {links && <div className="flex flex-col w-1/2 ps-12 gap-4">
+                    <h4 className="text-sm text-gray-700 !font-sans">Here are some helpful videos</h4>
+                    <div className="flex flex-row flex-wrap gap-2">
+                        {links.map((link, index) => <Tooltip
+                            style="light"
+                            content={
+                                <>
+                                    <iframe width="300" height="175" src={getEmbeddedUrl(link)} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                                </>
+                            }
+                        >
+                            <a href={link} target="_blank">
+                                <Button className=" py-0 !h-fit" pill color={'gray'}>
+                                    <h3 className="!font-sans text-gray-600">VIDEO LINK {index + 1} </h3>
+                                    <RiExternalLinkLine className="ms-3" />
+                                </Button>
+                            </a>
+                        </Tooltip>)}
+                    </div>
+                </div>}
+            </div>
+        )
+    }
+
+    const BotLoading = () => {
+
         return (
             <div className="flex flex-row items-start gap-2 w-full my-3">
                 <Avatar rounded size={'md'} />
-                <div className="flex flex-col w-full max-w-[320px] leading-1.5 p-4 bg-blue-300 rounded-e-xl rounded-es-xl dark:bg-gray-700">
-                    <div className="flex items-center justify-between space-x-2 rtl:space-x-reverse">
-                        <span className="text-sm font-semibold text-gray-700 dark:text-white">Frontida BOT</span>
-                        <MdInfo className="text-white" />
-                    </div>
-                    <p className="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{text}</p>
-                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400">11:46</span>
+                <div className="flex flex-row-reverse items-end justify-center  w-full max-w-[320px] leading-1.5 p-4 bg-blue-300 rounded-e-xl rounded-es-xl dark:bg-gray-700">
+                    <Spinner color="info" aria-label="Info spinner example" />
+                    <span className="text-sm !font-sans w-full text-start font-normal text-gray-500 dark:text-gray-400">Generating response ...</span>
                 </div>
-            </div>
+            </div >
         )
     }
 
     const UserCard = ({ text }) => {
         return (
-            <div className="flex flex-row items-start justify-end gap-2 w-full my-3">
+
+            <div className="flex flex-row items-start h-fit justify-end gap-2 w-full my-3">
                 <div className="h-full flex flex-col justify-center items-center">
                     <Tooltip
                         className="p-0 m-0 bg-transparent border-none"
@@ -89,13 +170,14 @@ function Chat() {
                         </Button>
                     </Tooltip>
                 </div>
-                <div className="flex flex-col w-full max-w-[320px] leading-1.5 px-4 py-1 border-gray-200 bg-white rounded-s-xl rounded-ee-xl dark:bg-gray-700">
-
+                <div className="flex h-fit flex-col w-full max-w-[320px] leading-1.5 px-4 py-1 border-gray-200 bg-white rounded-s-xl rounded-ee-xl dark:bg-gray-700">
                     <p className="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{text}</p>
                     <span className="text-sm font-normal text-gray-500 dark:text-gray-400">Delivered</span>
                 </div>
                 <Avatar rounded size={'md'} />
             </div>
+
+
         )
     }
 
@@ -113,7 +195,7 @@ function Chat() {
                 <div className="w-full flex flex-col justify-center items-center rounded py-3">
 
                     <div className={`${openSideNav ? "w-10/12" : "w-3/4"} flex flex-col justify-between h-full  gap-3 `}>
-                        <div className="flex flex-row justify-between w-full">
+                        <div className="flex flex-row h-fit justify-between w-full border-b-[1px] pb-4 border-gray-300">
                             <Badge className="rounded-full px-3 py-1 gap-3 text-lg flex flex-row justify-between" icon={RiPencilFill} >February_10_conversation_1</Badge>
 
                             <div className="flex flex-row">
@@ -127,7 +209,7 @@ function Chat() {
                                             <h3 className="font-serif w-full text-center">Are you sure you want to delete this chat?</h3>
                                             <div className="flex flex-row justify-between pt-2">
                                                 <Button color="blue" className="!py-0 h-fit">Cancel</Button>
-                                                <Button color="red"className="!text-red-500 h-fit !py-0">Delete</Button>
+                                                <Button color="red" className="!text-red-500 h-fit !py-0">Delete</Button>
                                             </div>
                                         </div>
                                     }
@@ -138,20 +220,33 @@ function Chat() {
 
                             </div>
                         </div>
-                        <div className="h-full w-full flex flex-col justify-end items-center">
-                            <UserCard text={'This is the type shii that gets yo bitches'} />
-                            <BotCard text={'Thats what Im talking about '} />
+                        <div className="h-full w-full !overflow-y-scroll scroll-force max-h-[65vh] flex flex-col items-center">
+
+                            {
+                                conversation.slice().reverse().map((item, index) => {
+                                    return (
+                                        <div key={index} className="w-full">
+                                            <UserCard text={item.user} />
+                                            <BotCard text={item.bot.text} links={item.bot.links} />
+                                        </div>
+                                    )
+                                })
+                            }
+                            {loading && <BotLoading />}
+
                         </div>
+
                         <div className="flex flex-row h-fit w-full">
-                            <form action="" className="w-full">
+                            <form onSubmit={handleSubmit(handlePrompt)} className="w-full">
                                 <div className="flex flex-row w-full gap-4">
                                     <TextInput
+                                        {...register('userPrompt', { required: 'Please type something' })}
                                         icon={GiQuill}
                                         rightIcon={RiRobot2Fill}
                                         placeholder="Your text goes here ..."
                                         className="w-full"
                                     />
-                                    <Button color="purple" className="py-0" >Send <RiArrowRightLine className="ms-2 text-2xl" /></Button>
+                                    <Button color="purple" type="submit" className="py-0" >Send <RiArrowRightLine className="ms-2 text-2xl" /></Button>
                                 </div>
                             </form>
                         </div>
