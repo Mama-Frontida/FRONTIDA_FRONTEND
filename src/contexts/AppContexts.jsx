@@ -14,6 +14,7 @@ export const AppProvider = ({ children }) => {
 
     const [userData, setUserData] = useState(null);
     const [activeConvo, setActiveConvo] = useState(null)
+    const [chats, setChats] = useState([])
 
     useEffect(() => {
         const storedUserData = sessionStorage.getItem('userData');
@@ -29,8 +30,13 @@ export const AppProvider = ({ children }) => {
 
         sessionStorage.setItem('userData', JSON.stringify(userData))
 
+
     }, [userData]);
 
+
+    useEffect(() => {
+        getChatsForUser(userData?.uid)
+    }, [userData])
 
     useEffect(() => {
         const handleBeforeUnload = () => {
@@ -159,9 +165,48 @@ export const AppProvider = ({ children }) => {
         }
     }
 
-    const saveChat = (chat_name, chat_data) => {
 
-    }
+    const getChatsForUser = async (userId) => {
+        try {
+            const userConvoRef = doc(db, "userConversations", userId);
+            const userConvoSnapshot = await getDoc(userConvoRef);
+
+            if (userConvoSnapshot.exists()) {
+                const userData = userConvoSnapshot.data();
+                setChats(userData.chats);
+            } else {
+                console.log("No data found for user:", userId);
+                return null;
+            }
+        } catch (error) {
+            console.error("Error getting chats for user:", userId, error);
+            return null;
+        }
+    };
+
+    const saveChat = async (chatName, chatData, userId) => {
+        const timestamp = new Date().getTime();
+
+        try {
+            const userConvoRef = doc(db, "userConversations", userId);
+            const userConvoSnapshot = await getDoc(userConvoRef);
+            let userData = {};
+
+            if (userConvoSnapshot.exists()) {
+                userData = userConvoSnapshot.data();
+            }
+
+            // Initialize an array to store chats if it doesn't exist
+            userData.chats = userData.chats || [];
+
+            // Add the new chat to the array
+            userData.chats.push({ name: chatName, data: chatData, date: timestamp });
+
+            await setDoc(userConvoRef, userData);
+        } catch (error) {
+            console.error(error);
+        }
+    };
     const saveConvo = async (data) => {
         let API_ENDPOINT = 'http://127.0.0.1:8000/api/add_convo'
         try {
@@ -191,7 +236,6 @@ export const AppProvider = ({ children }) => {
     const logout = () => {
         auth.signOut()
         setUserData(null)
-        setIsAuthenticated(false)
         sessionStorage.removeItem('userData');
         window.location.href = '/';
     }
@@ -202,9 +246,12 @@ export const AppProvider = ({ children }) => {
         signup,
         logout,
         promptBot,
-        setActiveConvo
-        , activeConvo
-        , saveConvo
+        setActiveConvo,
+        activeConvo,
+        saveConvo,
+        saveChat,
+        chats,
+        getChatsForUser
 
     };
 
