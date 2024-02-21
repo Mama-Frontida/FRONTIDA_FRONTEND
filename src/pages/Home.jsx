@@ -16,7 +16,7 @@ function Home() {
         <Link to={'/chat'}><Button color="dark" pill className="w-fit px-7">Get Started</Button></Link>
       </div>
       <div className="w-full md:w-1/2 flex items-center justify-center">
-        <img src="/images/Mother.png" className="w-full h-[40vh] object-top object-cover" alt="" />
+        <img src="/images/Mother.png" className="w-full h-[40vh] md:h-fit object-top object-cover" alt="" />
       </div>
     </section>
   );
