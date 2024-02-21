@@ -72,9 +72,9 @@ function Auth() {
         <div className="w-full flex flex-row justify-center items-center h-full">
             <form
                 onSubmit={handleSubmit(handleSignIn)}
-                className="w-1/3 rounded-lg items-center flex flex-col ">
-                <h2 className="text-5xl  w-3/4 text-center py-5"><b>Welcome back</b>, we missed you.</h2>
-                <h3 className="text-xl font-base text-gray-800 text-center py-5">
+                className="w-10/12 md:w-3/4 lg:w-1/3 rounded-lg items-center flex flex-col ">
+                <h2 className="text-3xl md:text-5xl  w-3/4 text-center md:py-5 py-2"><b>Welcome back</b>, we missed you.</h2>
+                <h3 className="text-sm md:text-xl font-base text-gray-800 text-center py-2 md:py-5">
                     Continue where you left off...
                 </h3>
                 {
@@ -93,7 +93,7 @@ function Auth() {
                     </Toast>
                 }
                 <div className="flex flex-col w-full gap-5 items-center justify-center py-10">
-                    <div className="flex flex-col gap-1 w-3/4">
+                    <div className="flex flex-col gap-1 w-full md:w-3/4">
                         <Label >Enter your email here:</Label>
                         <TextInput
                             type="email"
@@ -111,7 +111,7 @@ function Auth() {
                             color={errors.email?.message ? 'failure' : 'gray'}
                             helperText={errors.email?.message}
                         /></div>
-                    <div className="flex flex-col gap-1 w-3/4">
+                    <div className="flex flex-col gap-1 w-full md:w-3/4">
                         <Label >Enter your password here:</Label>
                         <TextInput
                             type="password"
@@ -133,7 +133,7 @@ function Auth() {
 
                 </div>
                 <div className="flex flex-col gap-3 w-full items-center">
-                    <div className="flex flex-row-reverse w-10/12 lg:w-3/4 justify-between">
+                    <div className="flex flex-row-reverse justify-center w-10/12 lg:w-3/4 md:justify-between">
                         <Link to={""} onClick={toggleAuth} >Create an account?</Link>
                     </div>
                     <Button
@@ -149,13 +149,13 @@ function Auth() {
         </div>
     )
     const SignUpForm = () => (
-        <div className="w-full  flex flex-row-reverse justify-center items-center h-fit">
+        <div className="w-full  flex flex-row-reverse justify-center items-center h-full">
             <form
                 onSubmit={handleSubmit(handleSignUp)}
-                className="w-1/3 card items-center flex flex-col gap-5 py-10">
-                <h2 className="text-5xl  w-10/12 text-center py-5">Create a <b className="me-3 text-gray-700">free</b>
+                className="w-10/12 md:w-3/4 lg:w-1/3 rounded-lg items-center flex flex-col">
+                <h2 className="text-3xl md:text-5xl  w-3/4 text-center md:py-5 py-2">Create a <b className="me-3 text-gray-700">free</b>
                     account with us</h2>
-                <h3 className="text-xl font-medium text-center py-5">
+                <h3 className="text-xs md:text-xl font-base text-gray-800 text-center pb-10 md:py-5">
                     Get started with an account to help us improve our services for you.
                 </h3>
                 <div className="flex w-full items-center flex-col gap-4">
@@ -174,7 +174,7 @@ function Auth() {
                             <Toast.Toggle />
                         </Toast>
                     }
-                    <div className="flex flex-col gap-1 w-3/4">
+                    <div className="flex flex-col gap-1 w-full md:w-3/4">
                         <Label >Enter your username here:</Label>
                         <TextInput
                             type="text"
@@ -189,7 +189,7 @@ function Auth() {
                             helperText={errors.username?.message}
                         />
                     </div>
-                    <div className="flex flex-col gap-1 w-3/4">
+                    <div className="flex flex-col gap-1 w-full md:w-3/4">
                         <Label >Enter your email here:</Label>
                         <TextInput
                             type="email"
@@ -208,7 +208,7 @@ function Auth() {
                             helperText={errors.email?.message}
                         />
                     </div>
-                    <div className="flex flex-row gap-3 w-3/4">
+                    <div className="flex flex-col md:flex-row gap-3 w-full md:w-3/4">
                         <div className="flex flex-col !w-full gap-1">
                             <Label >Choose a password:</Label>
                             <TextInput
@@ -249,8 +249,8 @@ function Auth() {
                 </div>
 
 
-                <Button pill type="submit" color="dark" >Create An Account</Button>
-                <div className="flex flex-row py-4 pb-10 w-10/12 lg:w-3/4 justify-between">
+                <Button pill type="submit" color="dark" className="mt-4 lg:mt-0" >Create An Account</Button>
+                <div className="flex flex-row py-4 pb-10 w-10/12 lg:w-3/4 justify-center lg:justify-between">
                     <Link to={""} onClick={toggleAuth}>Already have an account?</Link>
                 </div>
             </form>

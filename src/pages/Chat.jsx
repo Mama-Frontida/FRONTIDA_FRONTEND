@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 
 import { AppContext } from "../contexts/AppContexts";
 import { Avatar, AvatarGroupCounter, Badge, Button, TextInput, Tooltip, Spinner, Modal, Label } from "flowbite-react";
-import { MdArrowBackIos, MdArrowForwardIos, MdArrowRight, MdArrowRightAlt, MdChatBubble, MdChatBubbleOutline, MdEmojiPeople, MdInfo, MdVerticalSplit } from "react-icons/md";
+import { MdArrowBackIos, MdArrowForwardIos, MdArrowRight, MdArrowRightAlt, MdChatBubble, MdChatBubbleOutline, MdEmojiPeople, MdHistory, MdInfo, MdVerticalSplit } from "react-icons/md";
 import { GiChatBubble, GiHandGrip, GiInfo, GiPencil, GiPencilBrush, GiQuill, GiTrashCan } from "react-icons/gi";
 import { RiArrowRightLine, RiChatQuoteFill, RiExternalLinkLine, RiPencilFill, RiQuillPenFill, RiRobot2Fill, RiWomenFill } from "react-icons/ri";
 
@@ -45,6 +45,7 @@ function Chat() {
     const [unsavedData, setUnsavedData] = useState(false)
     const [savePrompt, setSavePrompt] = useState(false)
     const [saving, setSaving] = useState(false)
+    const [historyModal, setHistoryModal] = useState(false)
 
     const { userData, logout, chats, promptBot, saveChat, getChatsForUser } = useContext(AppContext)
 
@@ -147,7 +148,7 @@ function Chat() {
                         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">Responded</span>
                     </div>
                 </div>
-                {links && <div className="flex flex-col w-1/2 ps-12 gap-4">
+                {links && <div className="flex flex-col w-full md:w-3/4 lg:w-1/2 ps-0 md:ps-12 gap-1 md:gap-4">
                     <h4 className="text-sm text-gray-700 !font-sans">Here are some helpful videos</h4>
                     <div className="flex flex-row flex-wrap gap-2">
                         {links.map((link, index) => <Tooltip
@@ -159,11 +160,13 @@ function Chat() {
                                 </>
                             }
                         >
-                            <a href={link} target="_blank">
-                                <Button className=" py-0 !h-fit" pill color={'gray'}>
-                                    <h3 className="!font-sans text-gray-600">VIDEO LINK {index + 1} </h3>
-                                    <RiExternalLinkLine className="ms-3" />
-                                </Button>
+                            <a href={link} target="_blank" className="">
+                                <Badge className="rounded-full flex flex-row py-0 !w-fit !h-fit" pill color={'gray'}>
+                                    <div className="flex flex-row py-1 gap-2">
+                                        <h3 className="!font-sans text-gray-600 text-xs ">VIDEO LINK {index + 1} </h3>
+                                        <RiExternalLinkLine className="ms-1 md:ms-3" />
+                                    </div>
+                                </Badge>
                             </a>
                         </Tooltip>)}
                     </div>
@@ -321,9 +324,38 @@ function Chat() {
 
 
             </Modal>
+            <Modal
+                dismissible
+                show={historyModal}
+                onClose={() => setHistoryModal(false)}
+                position={'center'}
+                size={'sm'}
+                className="flex lg:hidden"
+            >
+                <Modal.Header>Conversation History</Modal.Header>
+                <Modal.Body>
+                    <div className="flex flex-col gap-1 w-full max-h-[75vh] overflow-y-scroll" >
+                        {chats &&
+
+                            chats.map((chat, index) => {
+                                // console.log('shatt', chat)
+                                return (
+                                    <Button
+                                        key={index}
+                                        onClick={() => displayOldChat(chat.data)}
+                                        color="blue" className="p-0 bg-blue-500" >
+                                        <h4 className="text-sm !font-sans">{chat.name}</h4>
+                                    </Button>
+                                )
+                            })
+
+                        }
+                    </div>
+                </Modal.Body>
+            </Modal>
 
             <div className="flex flex-row h-full p-2 gap-4">
-                <div className={`${openSideNav ? 'w-1/4' : 'w-fit'} h-full  rounded p-3`}>
+                <div className={`${openSideNav ? 'w-1/4' : 'w-fit'} h-full hidden lg:flex rounded p-3`}>
                     <div className="flex flex-col w-full gap-3">
                         <Button size={'lg'} className={!openSideNav ? "py-2" : 'w-fit'} color="gray" pill onClick={() => (setOpenSideNav(!openSideNav))} > {openSideNav ? <MdArrowBackIos /> : <MdArrowForwardIos />} {openSideNav && "Collapse"}</Button>
                         <Button
@@ -359,18 +391,32 @@ function Chat() {
                         </div>
                     </div>
                 </div>
-                <div className="w-full flex flex-col justify-center items-center rounded py-3">
+                <div className="w-full flex flex-col justify-center items-center rounded py-0 md:py-3">
 
-                    <div className={`${openSideNav ? "w-10/12" : "w-3/4"} flex flex-col justify-between h-full  gap-3 `}>
-                        <div className="flex flex-row h-fit justify-between w-full border-b-[1px] pb-4 border-gray-300">
+                    <div className={`${openSideNav ? "w-11/12 md:w-10/12" : "w-3/4"} flex flex-col justify-between h-full  gap-3 `}>
+                        <div className="flex flex-row h-fit gap-2 justify-between w-full border-b-[none] md:!border-b-[1px] pb-0 md:pb-4 border-gray-300">
                             <div className="flex flex-row gap-3">
                                 <Avatar rounded size={'md'} img={'/images/Bubble.jpeg'} status="online" statusPosition="top-right" />
-                                <div className="flex flex-col">
+                                <div className="hidden md:flex flex-col">
                                     <h3 className="text-xl font-bold">Frontida Bot</h3>
                                     <Badge className="w-fit">Online</Badge>
                                 </div>
                             </div>
-                            <div className="flex flex-row gap-4">
+                            <div className="flex flex-row gap-2 items-center justify-end w-full md:w-fit">
+
+                                <Button
+                                    onClick={() => {
+                                        if (unsavedData) {
+                                            setOpenModal(true)
+                                        }
+                                        else { setConversation([]) }
+                                    }}
+                                    className="m-0 p-0 flex lg:hidden" pill color="dark"><h4 className="hidden md:flex">New</h4><GiChatBubble className="m-0 md:ms-2" /> </Button>
+
+
+                                <Button
+                                    onClick={() => setHistoryModal(true)}
+                                    className="m-0 p-0 flex lg:hidden" pill color="light"><h4 className="hidden md:flex">History</h4><MdHistory className="m-0 md:ms-2" /> </Button>
 
                                 {/* <Button onClick={() => Save()} >Save shatt</Button> */}
                                 <Tooltip
@@ -394,7 +440,7 @@ function Chat() {
 
                             </div>
                         </div>
-                        <div className="h-full w-full !overflow-y-scroll scroll-force max-h-[65vh] flex flex-col items-center">
+                        <div className="h-full w-full !overflow-y-scroll scroll-force max-h-[70vh] md:max-h-[65vh] flex flex-col items-center">
 
                             {
                                 conversation.map((item, index) => {
@@ -412,8 +458,8 @@ function Chat() {
 
                         <div className="flex flex-row h-fit w-full">
                             <form onSubmit={handleSubmit(handlePrompt, { reset: true })} className="w-full">
-                                <div className="flex flex-row w-full gap-4">
-                                    <div className="flex flex-col w-full">
+                                <div className="flex flex-row w-full gap-1 md:gap-4">
+                                    <div className="flex flex-col justify-center items-center w-full">
                                         <TextInput
                                             {...register('userPrompt', { required: 'Please type something' })}
                                             icon={GiQuill}
@@ -424,7 +470,7 @@ function Chat() {
                                             helperText={errors.userPrompt?.message}
                                         />
                                     </div>
-                                    <Button color="purple" type="submit" className="py-0 h-fit" >Send <RiArrowRightLine className="ms-2 text-2xl" /></Button>
+                                    <Button color="purple" type="submit" className="py-0 h-fit" >Send <RiArrowRightLine className="ms-2 text-sm md:text-2xl" /></Button>
                                 </div>
                             </form>
                         </div>
