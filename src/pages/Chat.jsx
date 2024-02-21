@@ -423,16 +423,8 @@ function Chat() {
                                     style="light"
                                     arrow={false}
                                     trigger="click"
-                                    placement='bottom'
-                                    content={
-                                        <div className="w-[10vw]">
-                                            <h3 className="font-serif w-full text-center">Are you sure you want to delete this chat?</h3>
-                                            <div className="flex flex-row justify-between pt-2">
-                                                <Button color="blue" className="!py-0 h-fit">Cancel</Button>
-                                                <Button color="red" className="!text-red-500 h-fit !py-0">Delete</Button>
-                                            </div>
-                                        </div>
-                                    }
+                                    placement='left'
+                                    className="bg-transparent border-none"
                                 >
                                     <Badge icon={GiTrashCan} className="bg-red-400 px-3 py-2" color={'dark'} size={'xl'} />
 
